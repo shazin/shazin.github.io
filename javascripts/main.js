@@ -1,6 +1,8 @@
 // Resume page interactions: theme preference, print, and selected-work filters.
 const themeToggle = document.querySelector(".theme-toggle");
 const printButton = document.querySelector(".print-button");
+const sidebarToggle = document.querySelector(".sidebar-toggle");
+const pageShell = document.querySelector(".page-shell");
 const filterButtons = document.querySelectorAll(".filter-button");
 const projectCards = document.querySelectorAll(".project-card");
 const emptyMessage = document.querySelector(".filter-empty");
@@ -19,6 +21,15 @@ themeToggle.addEventListener("click", () => {
 });
 
 printButton.addEventListener("click", () => window.print());
+
+if (sidebarToggle && pageShell) {
+    sidebarToggle.addEventListener("click", () => {
+        const isExpanded = pageShell.classList.toggle("sidebar-collapsed") === false;
+        sidebarToggle.setAttribute("aria-expanded", String(isExpanded));
+        sidebarToggle.setAttribute("aria-label", isExpanded ? "Collapse profile sidebar" : "Expand profile sidebar");
+        sidebarToggle.title = isExpanded ? "Collapse profile sidebar" : "Expand profile sidebar";
+    });
+}
 
 filterButtons.forEach((button) => {
     button.addEventListener("click", () => {

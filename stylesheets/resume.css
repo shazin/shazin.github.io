@@ -59,6 +59,19 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--accent); outlin
 
 .page-shell { width: min(1160px, calc(100% - 64px)); display: grid; grid-template-columns: 256px minmax(0, 1fr); gap: clamp(44px, 7vw, 102px); margin: 0 auto; }
 .profile-rail { align-self: start; position: sticky; top: 30px; padding: 54px 0 36px; }
+.profile-rail-top { display: flex; align-items: flex-start; justify-content: space-between; }
+.sidebar-toggle { flex: 0 0 auto; margin: 0 0 0 10px; }
+.sidebar-toggle svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s ease; }
+.sidebar-collapsed { grid-template-columns: 78px minmax(0, 1fr); gap: clamp(30px, 4vw, 58px); }
+.sidebar-collapsed .profile-rail { width: 78px; }
+.sidebar-collapsed .profile-rail-top { flex-direction: column; align-items: center; gap: 14px; }
+.sidebar-collapsed .portrait-wrap, .sidebar-collapsed .portrait { width: 54px; height: 54px; }
+.sidebar-collapsed .portrait-wrap { margin: 0; }
+.sidebar-collapsed .profile-details { display: none; }
+.sidebar-collapsed .sidebar-toggle { margin: 0; }
+.sidebar-collapsed .sidebar-toggle svg { transform: rotate(0); }
+.page-shell:not(.sidebar-collapsed) .sidebar-toggle svg { transform: rotate(180deg); }
+.sidebar-toggle:hover { border-color: var(--accent); color: var(--accent); }
 .portrait-wrap { position: relative; width: 102px; height: 102px; margin-bottom: 26px; }
 .portrait { width: 102px; height: 102px; display: block; border: 1px solid rgba(40, 74, 58, .15); border-radius: 50%; object-fit: cover; object-position: center; }
 .status-dot { position: absolute; right: 3px; bottom: 7px; width: 15px; height: 15px; border: 3px solid var(--paper); border-radius: 50%; background: #77a77f; }
@@ -229,6 +242,7 @@ body[data-theme="dark"] .status-dot { border-color: var(--paper); }
 
 @media (min-width: 1400px) {
   .page-shell { width: min(1220px, calc(100% - 100px)); grid-template-columns: 270px minmax(0, 1fr); }
+  .page-shell.sidebar-collapsed { grid-template-columns: 78px minmax(0, 1fr); gap: clamp(30px, 4vw, 58px); }
   .hero { min-height: 460px; }
   .hero-art { right: 8px; width: 290px; height: 290px; }
 }
@@ -237,6 +251,7 @@ body[data-theme="dark"] .status-dot { border-color: var(--paper); }
   .topbar { padding: 0 28px; }
   .main-nav { gap: 15px; margin-left: 22px; font-size: 10px; }
   .page-shell { width: calc(100% - 56px); grid-template-columns: 210px minmax(0, 1fr); gap: 38px; }
+  .page-shell.sidebar-collapsed { grid-template-columns: 78px minmax(0, 1fr); gap: 28px; }
   .profile-rail h1 { font-size: 22px; }
   .hero-art { right: -78px; opacity: .7; }
   .hero-copy { width: 83%; }
@@ -255,13 +270,29 @@ body[data-theme="dark"] .status-dot { border-color: var(--paper); }
   .button { min-height: 37px; padding: 0 12px; font-size: 10px; }
   .page-shell { width: min(540px, calc(100% - 38px)); display: flex; flex-direction: column; gap: 0; }
   .profile-rail { position: relative; top: auto; display: grid; grid-template-columns: 72px 1fr; column-gap: 18px; padding: 28px 0 20px; }
+  .profile-rail-top { display: contents; }
+  .sidebar-toggle { grid-column: 1; grid-row: 2; justify-self: center; margin: 8px 0 0; }
   .portrait-wrap, .portrait { width: 72px; height: 72px; }
   .portrait-wrap { grid-row: span 2; margin: 0; }
   .portrait { font-size: 23px; }
   .status-dot { width: 13px; height: 13px; right: 0; bottom: 3px; }
   .profile-rail .eyebrow { align-self: end; margin: 0 0 4px; font-size: 8px; }
   .profile-rail h1 { align-self: start; font-size: 22px; }
+  .profile-details { display: contents; }
   .rail-intro, .rail-rule, .rail-label, .rail-link, .rail-note { display: none; }
+  .sidebar-collapsed { display: flex; }
+  .sidebar-collapsed .profile-rail { display: flex; align-items: center; gap: 12px; padding: 18px 0; }
+  .sidebar-collapsed .profile-rail-top { display: flex; flex-direction: row; align-items: center; gap: 12px; }
+  .sidebar-collapsed .portrait-wrap, .sidebar-collapsed .portrait { width: 48px; height: 48px; }
+  .sidebar-collapsed .profile-rail-top .sidebar-toggle { margin: 0; }
+  .sidebar-collapsed .profile-details { display: none; }
+  .page-shell:not(.sidebar-collapsed) .profile-details .rail-intro,
+  .page-shell:not(.sidebar-collapsed) .profile-details .rail-rule,
+  .page-shell:not(.sidebar-collapsed) .profile-details .rail-label,
+  .page-shell:not(.sidebar-collapsed) .profile-details .rail-link,
+  .page-shell:not(.sidebar-collapsed) .profile-details .rail-note { display: block; }
+  .page-shell:not(.sidebar-collapsed) .profile-details .rail-link { display: flex; }
+  .page-shell:not(.sidebar-collapsed) .profile-rail { grid-template-columns: 72px 1fr; }
   .hero { min-height: 385px; }
   .hero-copy { width: 100%; padding: 50px 0 60px; }
   .hero h2 { font-size: clamp(38px, 10vw, 52px); }
