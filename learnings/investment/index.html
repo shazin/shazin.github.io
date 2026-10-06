@@ -1,4 +1,8 @@
-<title>Investment Compound Calculator</title>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Investment Compound Calculator — Mohamed Shazin Sadakath</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -56,29 +60,27 @@
   }
 
   * { box-sizing: border-box; }
-  body {
+  .investment-body {
     background: var(--bg);
     color: var(--ink);
     font-family: var(--f-body);
     font-size: 15px;
     line-height: 1.5;
-    padding-inline: 20px;
-    padding-block: 32px 48px;
     -webkit-font-smoothing: antialiased;
   }
   .wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 28px; }
 
-  header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 32px; }
-  .eyebrow {
+  .calculator-app .wrap > header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 32px; }
+  .calculator-app .eyebrow {
     font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
     color: var(--accent); margin: 0 0 6px;
   }
-  h1 {
+  .calculator-app h1 {
     font-family: var(--f-display); font-weight: 400;
     font-size: clamp(34px, 5vw, 54px); line-height: 1.02; margin: 0;
     text-wrap: balance; letter-spacing: -0.01em;
   }
-  h1 em { font-style: normal; color: var(--accent); }
+  .calculator-app h1 em { font-style: normal; color: var(--accent); }
   .lede { color: var(--muted); max-width: 44ch; margin: 0; }
 
   .grid { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 24px; align-items: start; }
@@ -162,8 +164,92 @@
   .tip .row { display: flex; justify-content: space-between; gap: 16px; font-family: var(--f-num); font-variant-numeric: tabular-nums; }
   .tip .row.total { font-weight: 600; color: var(--accent); border-top: 1px solid var(--line); margin-top: 6px; padding-top: 6px; }
 
-  footer { font-size: 12px; color: var(--muted); text-align: left; max-width: 80ch; }
+  .calculator-app footer { font-size: 12px; color: var(--muted); text-align: left; max-width: 80ch; }
 </style>
+<link rel="stylesheet" href="../../stylesheets/resume.css">
+<style>
+  .investment-body {
+    --bg: #f5f4ef;
+    --surface: #fffefa;
+    --surface-2: #e8eee8;
+    --ink: #202925;
+    --muted: #737b74;
+    --line: #dedfd7;
+    --accent: #cb5a36;
+    --accent-soft: #f1e1d9;
+    --gold: #cb9b42;
+    padding: 0;
+    background: var(--paper);
+    color-scheme: light;
+  }
+  .investment-body[data-theme="dark"] {
+    --bg: #171d1a;
+    --surface: #222b25;
+    --surface-2: #28372e;
+    --ink: #e8ebe4;
+    --muted: #a4ada4;
+    --line: #354038;
+    --accent: #df7952;
+    --accent-soft: #50382e;
+    --gold: #d5ac62;
+    color-scheme: dark;
+  }
+  .calculator-card { padding: clamp(18px, 3vw, 34px); border: 1px solid var(--line); border-radius: 5px; background: var(--surface); box-shadow: var(--shadow); }
+  .calculator-card .wrap { max-width: none; margin: 0; }
+  .calculator-app { color: var(--ink); font-family: var(--f-body); }
+  .calculator-back { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 16px; color: var(--green); font-size: 11px; font-weight: 700; }
+  .calculator-back:hover { color: var(--accent); }
+  .calculator-app .wrap > header h1 { color: var(--ink); }
+  @media (max-width: 700px) { .calculator-card { padding: 16px 12px; } }
+</style>
+</head>
+<body class="investment-body">
+  <a class="skip-link" href="#calculator">Skip to calculator</a>
+  <header class="topbar">
+    <a class="brand" href="../../index.html#home" aria-label="Mohamed Shazin Sadakath, home">
+      <span class="brand-mark">S</span><span>Shazin Sadakath</span>
+    </a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a href="../../index.html#profile">Profile</a>
+      <a href="../../index.html#expertise">Expertise</a>
+      <a href="../../index.html#experience">Experience</a>
+      <a href="../../index.html#education">Education</a>
+      <a href="../../index.html#publications">Publications</a>
+      <a href="../../index.html#work">Selected work</a>
+      <a href="../../index.html#learnings" aria-current="page">Learnings</a>
+    </nav>
+    <div class="topbar-actions">
+      <button class="icon-button theme-toggle" type="button" aria-label="Switch to dark theme" title="Toggle theme">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+      </button>
+      <button class="button button-dark print-button" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8V3h10v5M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>
+        <span>Print calculator</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main" class="page-shell">
+    <aside class="profile-rail" id="profile" aria-label="Profile overview">
+      <div class="portrait-wrap">
+        <img class="portrait" src="../../images/me.jpeg" alt="Mohamed Shazin Sadakath">
+        <span class="status-dot" title="Open to interesting ideas"></span>
+      </div>
+      <p class="eyebrow">SOFTWARE ENGINEER</p>
+      <h1>Mohamed<br>Shazin Sadakath</h1>
+      <p class="rail-intro">I enjoy turning complex ideas into practical software—from backend platforms to connected devices.</p>
+      <div class="rail-rule"></div>
+      <p class="rail-label">Find me online</p>
+      <a class="rail-link" href="https://github.com/shazin" target="_blank" rel="noreferrer"><span class="link-icon">GH</span><span>GitHub</span><span class="external-arrow" aria-hidden="true">↗</span></a>
+      <a class="rail-link" href="http://shazinsadakath.medium.com/" target="_blank" rel="noreferrer"><span class="link-icon">✳</span><span>Technical blog</span><span class="external-arrow" aria-hidden="true">↗</span></a>
+      <a class="rail-link" href="https://shazinsadakath.com" target="_blank" rel="noreferrer"><span class="link-icon">↗</span><span>Personal website</span><span class="external-arrow" aria-hidden="true">↗</span></a>
+      <a class="rail-link calculator-rail-back" href="../../index.html#learnings"><span class="link-icon">←</span><span>Back to Learnings</span></a>
+      <div class="rail-note"><span class="note-mark">“</span><p>Curiosity is usually where the best projects begin.</p></div>
+    </aside>
+
+    <div class="resume-content calculator-content">
+      <a class="calculator-back" href="../../index.html#learnings"><span aria-hidden="true">←</span> Back to Learnings</a>
+      <section id="calculator" class="calculator-card calculator-app" aria-label="Investment Compound Calculator">
 
 <div class="wrap">
   <header>
@@ -236,6 +322,14 @@
 
   <footer>Investment growth compounds monthly and contributions are added at the end of each month. Figures are projections in today's dollars, before taxes, fees and inflation.</footer>
 </div>
+      </section>
+
+      <footer class="page-footer">
+        <a class="footer-brand" href="../../index.html#home"><span class="brand-mark">S</span> Made with curiosity.</a>
+        <span>Mohamed Shazin Sadakath <span class="footer-dot">·</span> <a href="../../index.html#learnings">Learnings ↗</a></span>
+      </footer>
+    </div>
+  </main>
 
 <script>
 (() => {
@@ -580,3 +674,6 @@
 
       gtag('config', 'G-DF0YVW03M7');
     </script>
+    <script src="../../javascripts/main.js" defer></script>
+</body>
+</html>
