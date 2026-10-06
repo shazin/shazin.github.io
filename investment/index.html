@@ -1,0 +1,573 @@
+<title>Investment Compound Calculator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* Layout: a vault ledger. Controls column on the left, the coin chart owns the right; stacks to one column on phones. */
+  :root {
+    --bg: #eceff4;
+    --surface: #ffffff;
+    --surface-2: #f5f7fa;
+    --ink: #172033;
+    --muted: #5b6579;
+    --line: #d6dbe4;
+    --accent: #946500;
+    --accent-soft: #f6e7c3;
+    --bronze: #a3613a;
+    --gold: #e2ac2a;
+    --grid: rgba(23, 32, 51, 0.08);
+    --shadow: 0 1px 2px rgba(23,32,51,.06), 0 12px 32px -12px rgba(23,32,51,.18);
+    --f-display: "Gloock", "Georgia", "Times New Roman", serif;
+    --f-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --f-num: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d121c;
+      --surface: #151c2a;
+      --surface-2: #1b2334;
+      --ink: #eef1f6;
+      --muted: #97a1b4;
+      --line: #273145;
+      --accent: #f0c04f;
+      --accent-soft: #3a3020;
+      --bronze: #c07a4c;
+      --gold: #f2c14e;
+      --grid: rgba(238, 241, 246, 0.07);
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 16px 40px -16px rgba(0,0,0,.6);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d121c;
+    --surface: #151c2a;
+    --surface-2: #1b2334;
+    --ink: #eef1f6;
+    --muted: #97a1b4;
+    --line: #273145;
+    --accent: #f0c04f;
+    --accent-soft: #3a3020;
+    --bronze: #c07a4c;
+    --gold: #f2c14e;
+    --grid: rgba(238, 241, 246, 0.07);
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 16px 40px -16px rgba(0,0,0,.6);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--f-body);
+    font-size: 15px;
+    line-height: 1.5;
+    padding-inline: 20px;
+    padding-block: 32px 48px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 28px; }
+
+  header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 32px; }
+  .eyebrow {
+    font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent); margin: 0 0 6px;
+  }
+  h1 {
+    font-family: var(--f-display); font-weight: 400;
+    font-size: clamp(34px, 5vw, 54px); line-height: 1.02; margin: 0;
+    text-wrap: balance; letter-spacing: -0.01em;
+  }
+  h1 em { font-style: normal; color: var(--accent); }
+  .lede { color: var(--muted); max-width: 44ch; margin: 0; }
+
+  .grid { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 24px; align-items: start; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: var(--shadow);
+  }
+  .controls { padding: 24px; display: grid; gap: 20px; }
+  .field { display: grid; gap: 6px; }
+  .field label { font-size: 13px; font-weight: 600; color: var(--muted); }
+  .input {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px;
+    padding: 0 14px; height: 48px; transition: border-color .15s, box-shadow .15s;
+  }
+  .input:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .input span { font-family: var(--f-num); color: var(--muted); font-size: 15px; }
+  .input input {
+    flex: 1; min-width: 0; border: 0; background: transparent; outline: none;
+    font-family: var(--f-num); font-size: 17px; font-weight: 500; color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .years { display: grid; gap: 10px; padding-top: 4px; border-top: 1px solid var(--line); }
+  .years-head { display: flex; justify-content: space-between; align-items: baseline; padding-top: 16px; }
+  .years-head label { font-size: 13px; font-weight: 600; color: var(--muted); }
+  .years-val { font-family: var(--f-display); font-size: 34px; line-height: 1; color: var(--ink); }
+  .years-val small { font-family: var(--f-body); font-size: 13px; color: var(--muted); margin-left: 4px; }
+
+  input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; background: transparent; cursor: pointer; }
+  input[type="range"]::-webkit-slider-runnable-track {
+    height: 8px; border-radius: 99px;
+    background: linear-gradient(90deg, var(--gold) 0 var(--p, 40%), var(--line) var(--p, 40%) 100%);
+  }
+  input[type="range"]::-moz-range-track { height: 8px; border-radius: 99px; background: var(--line); }
+  input[type="range"]::-moz-range-progress { height: 8px; border-radius: 99px; background: var(--gold); }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 26px; height: 26px; margin-top: -9px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff3c4 0 12%, #f5c842 40%, #b9821b 100%);
+    border: 2px solid #8a5d0e; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff3c4 0 12%, #f5c842 40%, #b9821b 100%);
+    border: 2px solid #8a5d0e; box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  }
+  input[type="range"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 8px; }
+  .ticks { display: flex; justify-content: space-between; font-family: var(--f-num); font-size: 11px; color: var(--muted); }
+
+  .note { font-size: 13px; color: var(--muted); margin: 0; }
+  .note b { color: var(--ink); font-weight: 600; }
+
+  .main { display: grid; gap: 20px; min-width: 0; }
+  .summary { padding: 22px 24px; display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 20px; align-items: end; }
+  @media (max-width: 620px) { .summary { grid-template-columns: 1fr 1fr; } .summary .big { grid-column: 1 / -1; } }
+  .stat { display: grid; gap: 4px; min-width: 0; }
+  .stat .k { font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .stat .v { font-family: var(--f-num); font-weight: 600; font-size: 20px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .big .v { font-family: var(--f-display); font-weight: 400; font-size: clamp(36px, 5vw, 52px); line-height: 1; color: var(--accent); }
+  .chip { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+  .chip.gold { background: radial-gradient(circle at 35% 30%, #fff1b8, #f2c14e 45%, #b8841f); }
+  .chip.bronze { background: radial-gradient(circle at 35% 30%, #f1c3a0, #c07a4c 45%, #7f4424); }
+
+  .chart { padding: 18px 18px 12px; position: relative; }
+  .chart-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; padding: 4px 6px 10px; }
+  .chart-head h2 { font-family: var(--f-display); font-weight: 400; font-size: 22px; margin: 0; }
+  .legend { display: flex; gap: 16px; font-size: 13px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .canvas-box { position: relative; width: 100%; height: clamp(320px, 52vw, 460px); }
+  canvas { display: block; width: 100%; height: 100%; touch-action: pan-y; }
+
+  .tip {
+    position: absolute; pointer-events: none; z-index: 2;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 12px; box-shadow: var(--shadow); font-size: 13px; min-width: 170px;
+    transform: translate(-50%, calc(-100% - 14px)); transition: opacity .12s;
+  }
+  .tip h3 { margin: 0 0 6px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .tip .row { display: flex; justify-content: space-between; gap: 16px; font-family: var(--f-num); font-variant-numeric: tabular-nums; }
+  .tip .row.total { font-weight: 600; color: var(--accent); border-top: 1px solid var(--line); margin-top: 6px; padding-top: 6px; }
+
+  footer { font-size: 12px; color: var(--muted); text-align: left; max-width: 80ch; }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <p class="eyebrow">Watch your gold pile up</p>
+      <h1>Investment <em>Compound</em> Calculator</h1>
+    </div>
+    <p class="lede">Set what you have today, what you add each month and the return you expect. Drag the years and see the vault fill.</p>
+  </header>
+
+  <div class="grid">
+    <aside class="panel controls" aria-label="Investment inputs">
+      <div class="field">
+        <label for="principal">Current investments</label>
+        <div class="input"><span>$</span><input id="principal" inputmode="decimal" value="10,000" autocomplete="off"></div>
+      </div>
+      <div class="field">
+        <label for="monthly">Monthly contribution</label>
+        <div class="input"><span>$</span><input id="monthly" inputmode="decimal" value="500" autocomplete="off"></div>
+      </div>
+      <div class="field">
+        <label for="rate">Annual return rate</label>
+        <div class="input"><input id="rate" inputmode="decimal" value="7" autocomplete="off"><span>%</span></div>
+      </div>
+
+      <div class="years">
+        <div class="years-head">
+          <label for="years">Years to grow</label>
+          <div class="years-val"><span id="yearsOut">20</span><small id="yearsUnit">years</small></div>
+        </div>
+        <input type="range" id="years" min="1" max="50" step="1" value="20" aria-describedby="yearsOut">
+        <div class="ticks"><span>1</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span></div>
+      </div>
+
+      <p class="note" id="insight"></p>
+      <p class="note" id="doubling"></p>
+    </aside>
+
+    <section class="main">
+      <div class="panel summary" aria-live="polite">
+        <div class="stat big">
+          <div class="k">Vault value in <span id="yearsLabel">20 years</span></div>
+          <div class="v" id="final">$0</div>
+        </div>
+        <div class="stat">
+          <div class="k"><i class="chip bronze"></i>You put in</div>
+          <div class="v" id="deposited">$0</div>
+        </div>
+        <div class="stat">
+          <div class="k"><i class="chip gold"></i>Growth earned</div>
+          <div class="v" id="growth">$0</div>
+        </div>
+      </div>
+
+      <div class="panel chart">
+        <div class="chart-head">
+          <h2>Year by year</h2>
+          <div class="legend">
+            <span><i class="chip bronze"></i>Your deposits</span>
+            <span><i class="chip gold"></i>Compound growth</span>
+          </div>
+        </div>
+        <div class="canvas-box" id="box">
+          <canvas id="cv" role="img" aria-label="Stacks of coins showing the investment value at the end of each year"></canvas>
+          <div class="tip" id="tip" hidden></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>Interest compounds monthly and contributions are added at the end of each month. Figures are projections in today's dollars, before taxes, fees and inflation.</footer>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const principalEl = $('principal'), monthlyEl = $('monthly'), rateEl = $('rate'), yearsEl = $('years');
+  const cv = $('cv'), box = $('box'), tip = $('tip');
+  const ctx = cv.getContext('2d');
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const usd0 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  const num0 = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
+  function compact(v) {
+    const a = Math.abs(v);
+    if (a >= 1e9) return '$' + +(v / 1e9).toFixed(a >= 1e10 ? 0 : 1) + 'B';
+    if (a >= 1e6) return '$' + +(v / 1e6).toFixed(a >= 1e7 ? 1 : 2) + 'M';
+    if (a >= 1e3) return '$' + +(v / 1e3).toFixed(a >= 1e5 ? 0 : 1) + 'k';
+    return '$' + Math.round(v);
+  }
+  const parse = el => { const n = parseFloat(String(el.value).replace(/[^0-9.\-]/g, '')); return isFinite(n) ? n : 0; };
+
+  // Monthly compounding, contributions at month end. Returns end-of-year values for years 0..N.
+  function project(P, C, ratePct, years) {
+    const r = ratePct / 100 / 12;
+    let bal = P;
+    const out = [{ year: 0, value: P, deposits: P }];
+    for (let y = 1; y <= years; y++) {
+      for (let m = 0; m < 12; m++) bal = bal * (1 + r) + C;
+      out.push({ year: y, value: bal, deposits: P + C * 12 * y });
+    }
+    return out;
+  }
+
+  // ---------- animated state ----------
+  let data = [];
+  const anim = { value: [], deposits: [], max: 1, slots: 21, final: 0, dep: 0, gro: 0 };
+  let hoverIdx = -1, raf = 0, t0 = performance.now();
+
+  function niceMax(v) {
+    if (v <= 0) return 1;
+    const step = niceStep(v / 4);
+    return Math.ceil(v / step) * step;
+  }
+  function niceStep(raw) {
+    const p = Math.pow(10, Math.floor(Math.log10(raw)));
+    const f = raw / p;
+    return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p;
+  }
+
+  function recompute() {
+    const P = Math.max(0, parse(principalEl));
+    const C = Math.max(0, parse(monthlyEl));
+    const R = Math.min(100, Math.max(-50, parse(rateEl)));
+    const N = +yearsEl.value;
+    data = project(P, C, R, N);
+
+    $('yearsOut').textContent = N;
+    $('yearsUnit').textContent = N === 1 ? 'year' : 'years';
+    $('yearsLabel').textContent = N + (N === 1 ? ' year' : ' years');
+    yearsEl.style.setProperty('--p', ((N - 1) / 49 * 100) + '%');
+
+    const last = data[N];
+    const growth = last.value - last.deposits;
+    const cross = data.find(d => d.year > 0 && d.value - d.deposits > d.deposits);
+    $('insight').innerHTML = growth <= 0
+      ? 'With no positive return, the vault only holds what you put in.'
+      : cross
+        ? `Growth outweighs everything you deposited by <b>year ${cross.year}</b>. After that, your money earns more than you add.`
+        : `Growth makes up <b>${Math.round(growth / last.value * 100)}%</b> of the vault after ${N} ${N === 1 ? 'year' : 'years'}. Keep sliding to see when it overtakes your deposits.`;
+    $('doubling').innerHTML = R > 0
+      ? `At ${num0.format(R)}% a year, money doubles about every <b>${(72 / R).toFixed(1)} years</b> (rule of 72).`
+      : '';
+
+    if (reduceMotion) snap();
+    kick();
+  }
+
+  function snap() {
+    data.forEach((d, i) => { anim.value[i] = d.value; anim.deposits[i] = d.deposits; });
+    anim.value.length = anim.deposits.length = data.length;
+    anim.slots = data.length;
+    anim.max = niceMax(Math.max(...data.map(d => Math.max(d.value, d.deposits))));
+    const last = data[data.length - 1];
+    anim.final = last.value; anim.dep = last.deposits; anim.gro = last.value - last.deposits;
+  }
+
+  function kick() { if (!raf) raf = requestAnimationFrame(tick); }
+
+  function tick(now) {
+    raf = 0;
+    const k = reduceMotion ? 1 : 0.14;
+    let moving = false;
+    const lerp = (a, b) => { const n = a + (b - a) * k; if (Math.abs(b - n) > Math.max(0.5, Math.abs(b) * 0.0005)) { moving = true; return n; } return b; };
+
+    const n = data.length;
+    const len = Math.max(n, anim.value.length);
+    for (let i = 0; i < len; i++) {
+      const tv = i < n ? data[i].value : 0, td = i < n ? data[i].deposits : 0;
+      anim.value[i] = lerp(anim.value[i] ?? 0, tv);
+      anim.deposits[i] = lerp(anim.deposits[i] ?? 0, td);
+    }
+    while (anim.value.length > n && anim.value[anim.value.length - 1] === 0) { anim.value.pop(); anim.deposits.pop(); }
+    anim.slots = lerp(anim.slots, n);
+    anim.max = lerp(anim.max, niceMax(Math.max(...data.map(d => Math.max(d.value, d.deposits)))));
+    const last = data[n - 1];
+    anim.final = lerp(anim.final, last.value);
+    anim.dep = lerp(anim.dep, last.deposits);
+    anim.gro = lerp(anim.gro, last.value - last.deposits);
+
+    $('final').textContent = usd0.format(anim.final);
+    $('deposited').textContent = usd0.format(anim.dep);
+    $('growth').textContent = usd0.format(anim.gro);
+
+    draw(now);
+    // keep a slow frame loop going for the glint on the top coin
+    if (moving) kick();
+    else if (!reduceMotion) setTimeout(kick, 60);
+  }
+
+  // ---------- drawing ----------
+  let W = 0, H = 0, dpr = 1;
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const r = box.getBoundingClientRect();
+    W = r.width; H = r.height;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    kick();
+  }
+  new ResizeObserver(resize).observe(box);
+
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+  // Coin palettes: face highlight, face mid, face dark, edge light, edge dark
+  const GOLD = ['#fff4c2', '#f4c542', '#c98f1c', '#d9a12a', '#8f5f0c'];
+  const BRONZE = ['#f5cfae', '#c9814f', '#8e4c28', '#a9643a', '#5f2f16'];
+
+  function layout() {
+    const padL = W < 500 ? 46 : 58, padR = 10, padT = 22, padB = 30;
+    return { padL, padR, padT, padB, plotW: W - padL - padR, plotH: H - padT - padB };
+  }
+
+  function draw(now) {
+    if (!W) return;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    const { padL, padT, plotW, plotH } = layout();
+    const ink = css('--muted'), grid = css('--grid'), line = css('--line');
+    const slotW = plotW / Math.max(anim.slots, 1);
+    const rx = Math.max(2.2, Math.min(slotW * 0.4, 30));
+    const ry = Math.max(1.6, rx * 0.34);
+    const t = Math.max(2.2, Math.min(ry * 0.62, 7));
+    const base = padT + plotH - ry;           // centre of the bottom face of each stack
+    const usableH = plotH - ry * 2 - 4;
+    const yOf = v => base - (v / anim.max) * usableH;
+
+    // grid + y labels
+    ctx.font = `500 11px ${css('--f-num')}`;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'right';
+    const step = niceStep(anim.max / 4);
+    for (let v = 0; v <= anim.max * 1.001; v += step) {
+      const y = Math.round(yOf(v)) + 0.5;
+      ctx.strokeStyle = v === 0 ? line : grid;
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + plotW, y); ctx.stroke();
+      ctx.fillStyle = ink;
+      ctx.fillText(compact(v), padL - 8, y);
+    }
+
+    // x labels
+    const nYears = data.length - 1;
+    const every = [1, 2, 5, 10].find(s => (nYears / s) * 34 < plotW) || 10;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    for (let i = 0; i < anim.value.length; i++) {
+      if (i > nYears) break;
+      if (i % every !== 0 && i !== nYears) continue;
+      if (i !== nYears && nYears - i < every * 0.6) continue;
+      const cx = padL + slotW * (i + 0.5);
+      ctx.fillStyle = i === hoverIdx ? css('--ink') : ink;
+      ctx.fillText(i === 0 ? 'Now' : 'Yr ' + i, cx, padT + plotH + 10);
+    }
+
+    // stacks
+    for (let i = 0; i < anim.value.length; i++) {
+      const v = anim.value[i];
+      if (v <= 0) continue;
+      const cx = padL + slotW * (i + 0.5);
+      const h = base - yOf(v);
+      const dh = base - yOf(Math.min(anim.deposits[i], v));
+      const dim = hoverIdx >= 0 && hoverIdx !== i;
+      ctx.globalAlpha = dim ? 0.45 : 1;
+      drawStack(cx, base, rx, ry, t, h, dh, i === data.length - 1 ? now : 0);
+    }
+    ctx.globalAlpha = 1;
+
+    // hover guide
+    if (hoverIdx >= 0 && hoverIdx < data.length) {
+      const cx = padL + slotW * (hoverIdx + 0.5);
+      ctx.strokeStyle = css('--accent');
+      ctx.setLineDash([3, 4]);
+      ctx.beginPath(); ctx.moveTo(cx, padT - 6); ctx.lineTo(cx, yOf(anim.value[hoverIdx]) - ry - 6); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  function drawStack(cx, base, rx, ry, t, h, depH, glintTime) {
+    const count = Math.max(1, Math.ceil(h / t));
+    const gGold = faceGradient(cx, rx, GOLD), gBronze = faceGradient(cx, rx, BRONZE);
+    const eGold = edgeGradient(cx, rx, GOLD), eBronze = edgeGradient(cx, rx, BRONZE);
+    const detail = rx >= 9;
+
+    // soft shadow on the floor
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.beginPath(); ctx.ellipse(cx + rx * 0.12, base + ry * 0.35, rx * 1.05, ry * 0.9, 0, 0, Math.PI * 2); ctx.fill();
+
+    for (let i = 0; i < count; i++) {
+      const yb = base - Math.min(i * t, h);
+      const yt = base - Math.min((i + 1) * t, h);
+      if (yb - yt <= 0.01) continue;
+      const mid = (base - (yb + yt) / 2);
+      const isDep = mid <= depH;
+      const pal = isDep ? BRONZE : GOLD;
+      // a few coins sit slightly off-centre, like a real stack
+      const jitter = detail ? (Math.sin(i * 12.9898) * 43758.5453 % 1) * rx * 0.05 : 0;
+      const x = cx + jitter;
+
+      // edge (side band)
+      ctx.fillStyle = isDep ? eBronze : eGold;
+      ctx.beginPath();
+      ctx.moveTo(x - rx, yt);
+      ctx.lineTo(x - rx, yb);
+      ctx.ellipse(x, yb, rx, ry, 0, Math.PI, 0, true);
+      ctx.lineTo(x + rx, yt);
+      ctx.closePath();
+      ctx.fill();
+      // reeded edge line between coins
+      ctx.strokeStyle = pal[4];
+      ctx.globalAlpha *= 0.55;
+      ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.ellipse(x, yb, rx, ry, 0, 0, Math.PI); ctx.stroke();
+      ctx.globalAlpha /= 0.55;
+
+      // top face, only fully drawn on the top coin (others are hidden under the next coin)
+      if (i === count - 1) {
+        ctx.fillStyle = isDep ? gBronze : gGold;
+        ctx.beginPath(); ctx.ellipse(x, yt, rx, ry, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = pal[2]; ctx.lineWidth = 1;
+        ctx.stroke();
+        if (detail) {
+          ctx.strokeStyle = pal[2]; ctx.globalAlpha *= 0.7;
+          ctx.beginPath(); ctx.ellipse(x, yt, rx * 0.72, ry * 0.72, 0, 0, Math.PI * 2); ctx.stroke();
+          ctx.globalAlpha /= 0.7;
+          ctx.fillStyle = pal[2];
+          ctx.font = `700 ${Math.round(ry * 1.05)}px ${css('--f-body')}`;
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.save(); ctx.translate(x, yt); ctx.scale(1, 0.62); ctx.fillText('$', 0, ry * 0.08); ctx.restore();
+        }
+        if (glintTime && !reduceMotion) drawGlint(x + rx * 0.45, yt - ry * 0.2, rx, glintTime);
+      }
+    }
+  }
+
+  function drawGlint(x, y, rx, now) {
+    const phase = ((now - t0) / 2600) % 1;
+    const a = Math.max(0, Math.sin(phase * Math.PI * 2)) ** 3;
+    if (a < 0.02) return;
+    const s = Math.max(5, rx * 0.5) * (0.6 + a * 0.6);
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.fillStyle = '#fffbe8';
+    ctx.beginPath();
+    ctx.moveTo(x, y - s); ctx.quadraticCurveTo(x, y, x + s * 0.28, y);
+    ctx.quadraticCurveTo(x, y, x, y + s); ctx.quadraticCurveTo(x, y, x - s * 0.28, y);
+    ctx.quadraticCurveTo(x, y, x, y - s);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function faceGradient(cx, rx, p) {
+    const g = ctx.createLinearGradient(cx - rx, 0, cx + rx, 0);
+    g.addColorStop(0, p[1]); g.addColorStop(0.35, p[0]); g.addColorStop(0.7, p[1]); g.addColorStop(1, p[2]);
+    return g;
+  }
+  function edgeGradient(cx, rx, p) {
+    const g = ctx.createLinearGradient(cx - rx, 0, cx + rx, 0);
+    g.addColorStop(0, p[4]); g.addColorStop(0.3, p[3]); g.addColorStop(0.55, p[0]); g.addColorStop(0.8, p[3]); g.addColorStop(1, p[4]);
+    return g;
+  }
+
+  // ---------- hover tooltip ----------
+  function pick(e) {
+    const r = cv.getBoundingClientRect();
+    const x = e.clientX - r.left;
+    const { padL, plotW } = layout();
+    const slotW = plotW / data.length;
+    const i = Math.floor((x - padL) / slotW);
+    if (i < 0 || i >= data.length) return hide();
+    hoverIdx = i;
+    const d = data[i];
+    tip.innerHTML = `<h3>${i === 0 ? 'Today' : 'End of year ' + i}</h3>
+      <div class="row"><span>Deposits</span><span>${usd0.format(d.deposits)}</span></div>
+      <div class="row"><span>Growth</span><span>${usd0.format(d.value - d.deposits)}</span></div>
+      <div class="row total"><span>Total</span><span>${usd0.format(d.value)}</span></div>`;
+    tip.hidden = false;
+    const cx = padL + slotW * (i + 0.5);
+    const half = tip.offsetWidth / 2 + 4;
+    tip.style.left = Math.min(Math.max(cx, half), W - half) + 'px';
+    tip.style.top = Math.max(e.clientY - r.top, tip.offsetHeight + 18) + 'px';
+    kick();
+  }
+  function hide() { hoverIdx = -1; tip.hidden = true; kick(); }
+  cv.addEventListener('pointermove', pick);
+  cv.addEventListener('pointerdown', pick);
+  cv.addEventListener('pointerleave', hide);
+
+  // ---------- inputs ----------
+  function formatMoneyField(el) {
+    const n = parse(el);
+    el.value = n ? n.toLocaleString('en-US', { maximumFractionDigits: 2 }) : '0';
+  }
+  [principalEl, monthlyEl, rateEl].forEach(el => {
+    el.addEventListener('input', recompute);
+    el.addEventListener('focus', () => el.select());
+  });
+  [principalEl, monthlyEl].forEach(el => el.addEventListener('blur', () => formatMoneyField(el)));
+  rateEl.addEventListener('blur', () => { rateEl.value = num0.format(parse(rateEl)); });
+  yearsEl.addEventListener('input', recompute);
+
+  // first frame: start from a short pile so the opening grows into place
+  recompute();
+  anim.max = niceMax(Math.max(...data.map(d => d.value)));
+  anim.final = 0; anim.dep = 0; anim.gro = 0;
+  if (reduceMotion) snap();
+  resize();
+})();
+</script>
